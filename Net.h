@@ -15,6 +15,7 @@
 #define PLATFORM_WINDOWS  1
 #define PLATFORM_MAC      2
 #define PLATFORM_UNIX     3
+const int PacketSizeHack = 256 + 128;
 
 #if defined(_WIN32)
 #define PLATFORM PLATFORM_WINDOWS
@@ -66,11 +67,12 @@ namespace net
 	void wait(float seconds) { usleep((int)(seconds * 1000000.0f)); }
 
 #endif
-
+	
 	// internet address
 
 	class Address
 	{
+		
 	public:
 
 		Address()
@@ -258,7 +260,7 @@ namespace net
 		bool Send(const Address& destination, const void* data, int size)
 		{
 			assert(data);
-			assert(size > 0);
+			assert(PacketSizeHack > 0);
 
 			if (socket == 0)
 				return false;
@@ -271,15 +273,15 @@ namespace net
 			address.sin_addr.s_addr = htonl(destination.GetAddress());
 			address.sin_port = htons((unsigned short)destination.GetPort());
 
-			int sent_bytes = sendto(socket, (const char*)data, size, 0, (sockaddr*)&address, sizeof(sockaddr_in));
+			int sent_bytes = sendto(socket, (const char*)data, PacketSizeHack, 0, (sockaddr*)&address, sizeof(sockaddr_in));
 
-			return sent_bytes == size;
+			return sent_bytes == PacketSizeHack;
 		}
 
 		int Receive(Address& sender, void* data, int size)
 		{
 			assert(data);
-			assert(size > 0);
+			assert(PacketSizeHack > 0);
 
 			if (socket == 0)
 				return false;
@@ -291,7 +293,7 @@ namespace net
 			sockaddr_in from;
 			socklen_t fromLength = sizeof(from);
 
-			int received_bytes = recvfrom(socket, (char*)data, size, 0, (sockaddr*)&from, &fromLength);
+			int received_bytes = recvfrom(socket, (char*)data, PacketSizeHack, 0, (sockaddr*)&from, &fromLength);
 
 			if (received_bytes <= 0)
 				return 0;
@@ -444,21 +446,21 @@ namespace net
 			assert(running);
 			if (address.GetAddress() == 0)
 				return false;
-			unsigned char packet[size + 4];
+			unsigned char packet[PacketSizeHack + 4];
 			packet[0] = (unsigned char)(protocolId >> 24);
 			packet[1] = (unsigned char)((protocolId >> 16) & 0xFF);
 			packet[2] = (unsigned char)((protocolId >> 8) & 0xFF);
 			packet[3] = (unsigned char)((protocolId) & 0xFF);
-			std::memcpy(&packet[4], data, size);
-			return socket.Send(address, packet, size + 4);
+			std::memcpy(&packet[4], data, PacketSizeHack);
+			return socket.Send(address, packet, PacketSizeHack + 4);
 		}
 
 		virtual int ReceivePacket(unsigned char data[], int size)
 		{
 			assert(running);
-			unsigned char packet[size + 4];
+			unsigned char packet[PacketSizeHack + 4];
 			Address sender;
-			int bytes_read = socket.Receive(sender, packet, size + 4);
+			int bytes_read = socket.Receive(sender, packet, PacketSizeHack + 4);
 			if (bytes_read == 0)
 				return 0;
 			if (bytes_read <= 4)
@@ -656,7 +658,7 @@ namespace net
 			PacketData data;
 			data.sequence = local_sequence;
 			data.time = 0.0f;
-			data.size = size;
+			data.size = PacketSizeHack;
 			sentQueue.push_back(data);
 			pendingAckQueue.push_back(data);
 			sent_packets++;
@@ -673,7 +675,7 @@ namespace net
 			PacketData data;
 			data.sequence = sequence;
 			data.time = 0.0f;
-			data.size = size;
+			data.size = PacketSizeHack;
 			receivedQueue.push_back(data);
 			if (sequence_more_recent(sequence, remote_sequence, max_sequence))
 				remote_sequence = sequence;
@@ -965,30 +967,30 @@ namespace net
 #ifdef NET_UNIT_TEST
 			if (reliabilitySystem.GetLocalSequence() & packet_loss_mask)
 			{
-				reliabilitySystem.PacketSent(size);
+				reliabilitySystem.PacketSent(PacketSizeHack);
 				return true;
 			}
 #endif
 			const int header = 12;
-			unsigned char packet[header + size];
+			unsigned char packet[header + PacketSizeHack];
 			unsigned int seq = reliabilitySystem.GetLocalSequence();
 			unsigned int ack = reliabilitySystem.GetRemoteSequence();
 			unsigned int ack_bits = reliabilitySystem.GenerateAckBits();
 			WriteHeader(packet, seq, ack, ack_bits);
-			std::memcpy(packet + header, data, size);
-			if (!Connection::SendPacket(packet, size + header))
+			std::memcpy(packet + header, data, PacketSizeHack);
+			if (!Connection::SendPacket(packet, PacketSizeHack + header))
 				return false;
-			reliabilitySystem.PacketSent(size);
+			reliabilitySystem.PacketSent(PacketSizeHack);
 			return true;
 		}
 
 		int ReceivePacket(unsigned char data[], int size)
 		{
 			const int header = 12;
-			if (size <= header)
+			if (PacketSizeHack <= header)
 				return false;
-			unsigned char packet[header + size];
-			int received_bytes = Connection::ReceivePacket(packet, size + header);
+			unsigned char packet[header + PacketSizeHack];
+			int received_bytes = Connection::ReceivePacket(packet, PacketSizeHack + header);
 			if (received_bytes == 0)
 				return false;
 			if (received_bytes <= header)
