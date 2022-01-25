@@ -451,7 +451,7 @@ namespace net
 			packet[1] = (unsigned char)((protocolId >> 16) & 0xFF);
 			packet[2] = (unsigned char)((protocolId >> 8) & 0xFF);
 			packet[3] = (unsigned char)((protocolId) & 0xFF);
-			std::memcpy(&packet[4], data, PacketSizeHack);
+			std::memcpy(packet, data, PacketSizeHack);
 			return socket.Send(address, packet, PacketSizeHack + 4);
 		}
 
@@ -962,7 +962,7 @@ namespace net
 
 		// overriden functions from "Connection"
 
-		bool SendPacket(const unsigned char data[], int size)
+		bool SendPacket(const unsigned char data[], int size, int count)
 		{
 #ifdef NET_UNIT_TEST
 			if (reliabilitySystem.GetLocalSequence() & packet_loss_mask)
@@ -971,6 +971,10 @@ namespace net
 				return true;
 			}
 #endif
+			count++;
+			char packetData[128] = "Hello world ";
+
+
 			const int header = 12;
 			unsigned char packet[header + PacketSizeHack];
 			unsigned int seq = reliabilitySystem.GetLocalSequence();
@@ -978,13 +982,14 @@ namespace net
 			unsigned int ack_bits = reliabilitySystem.GenerateAckBits();
 			WriteHeader(packet, seq, ack, ack_bits);
 			std::memcpy(packet + header, data, PacketSizeHack);
+			std::memcpy(packet, packetData, sizeof(packetData));
 			if (!Connection::SendPacket(packet, PacketSizeHack + header))
 				return false;
 			reliabilitySystem.PacketSent(PacketSizeHack);
 			return true;
 		}
 
-		int ReceivePacket(unsigned char data[], int size)
+		int ReceivePacket(unsigned char data[], int size, unsigned char feedback[])
 		{
 			const int header = 12;
 			if (PacketSizeHack <= header)
@@ -1002,6 +1007,7 @@ namespace net
 			reliabilitySystem.PacketReceived(packet_sequence, received_bytes - header);
 			reliabilitySystem.ProcessAck(packet_ack, packet_ack_bits);
 			std::memcpy(data, packet + header, received_bytes - header);
+			printf("%s", feedback);
 			return received_bytes - header;
 		}
 
