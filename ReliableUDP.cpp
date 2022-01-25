@@ -118,7 +118,18 @@ private:
 
 int main(int argc, char* argv[])
 {
-	// parse command line
+	// command line arguments should be included. users should be able to configure their 
+	// connections using the command line arguments, giving essential metadata for 
+	// transmission. 
+	// 
+	// **First argument should include name of desired file to transmit.**
+	// allow both relative and explicit filepaths. 
+	//
+	// Remember to include reasonable defaults, and add user feedback showing their currently 
+	// configured parameters.
+	// ask for socket, IP, port, respectively. 
+	// FORMAT WILL BE AS FOLLOWS:
+	// ReliableUDP.exe [file] [socket num.] [IP] [port num.]
 
 	enum Mode
 	{
@@ -128,6 +139,8 @@ int main(int argc, char* argv[])
 
 	Mode mode = Server;
 	Address address;
+
+	
 
 	if (argc >= 2)
 	{
@@ -140,7 +153,26 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	// initialize
+	// before connection is opened, ensure that file exists and can be opened.
+	// also ensure that file is an appropriate format (ASCII/binary).
+	// (call to file open function, after checking file extension)
+	// 
+	// After file has been double-checked for compatibility, split the file 
+	// into chunks for transmission. 
+	// 
+	// use a data structure(?) or another method to split file into reasonably 
+	// sized chunks (composed of several packets). 'chunk' size should be a 
+	// relatively large amount of packets.
+	// (test overhead with smaller/larger packets[?])
+	// larger chunks should reduce overhead while keeping error correction 
+	// time lower.
+	// 
+	// remember to send one chunk at a time, one packet at a time. 
+	// after a chunk has been fully transmitted, check the chunk and 
+	// continue if no other action needs to be taken.
+	//
+
+	// initialize sockets.
 
 	if (!InitializeSockets())
 	{
@@ -157,6 +189,19 @@ int main(int argc, char* argv[])
 		printf("could not start connection on port %d\n", port);
 		return 1;
 	}
+
+	// need to tweak this functionality to accept and parse the new set of parameters and their formats. 
+	// add a call to a FileOperations.cpp function that will open a file based upon the first
+	// parameter. This task will be done clientside.
+	// 
+	// Will parse and open desired file before parsing the socket number, IP and port number to open 
+	// a connection. 
+	// 
+	// when metadata has been successfully parsed and opened, relay to client that connection was opened
+	// (tweak current feedback line) 
+	// e.g. "Connection was opened at [IP], port [port num.], at socket [socket num.]"
+	// 
+	//
 
 	if (mode == Client)
 		connection.Connect(address);
@@ -201,21 +246,39 @@ int main(int argc, char* argv[])
 
 		// send and receive packets
 
+		//
+		// Implement a function to 'iterate' through a chunk of a file and check 
+		// if any further action is needed.
+		// 
+		// chunks should, ideally, be evenly divided (x packets per chunk).
+		// function will do as follows:
+		//  - receive information regarding current chunk and 'progress' 
+		// (packets already transmitted in each chunk)
+		//  - increment through each chunk, packet by packet.
+		//  - when the end of a chunk is reached (packet x), move onto the next chunk.
+		//  - **if an error is found in the current chunk the entire chunk should be retransmitted.**
+		//
+
 		sendAccumulator += DeltaTime;
 
 		while (sendAccumulator > 1.0f / sendRate)
 		{
+			int count = 0;
 			unsigned char packet[PacketSize];
-			memset(packet, 0, sizeof(packet));
-			connection.SendPacket(packet, sizeof(packet));
+			const unsigned char newData[50] = "wahah wee";
+			memcpy(packet, newData, 50);
+			//memset(packet, 0, sizeof(packet));
+			connection.SendPacket(packet, sizeof(packet), count);
 			sendAccumulator -= 1.0f / sendRate;
+			printf("% s", "packet sent !");
 		}
 
 		while (true)
 		{
 			unsigned char packet[256];
-			int bytes_read = connection.ReceivePacket(packet, sizeof(packet));
+			int bytes_read = connection.ReceivePacket(packet, sizeof(packet), packet);
 			if (bytes_read == 0)
+				printf("% s", "packet recieved !");
 				break;
 		}
 
