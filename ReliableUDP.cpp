@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Net.h"
+#include "FileOperations.cpp"
 
 //#define SHOW_ACKS
 
@@ -140,7 +141,18 @@ int main(int argc, char* argv[])
 	Mode mode = Server;
 	Address address;
 
-	
+	// need to tweak this functionality to accept and parse the new set of parameters and their formats. 
+	// add a call to a FileOperations.cpp function that will open a file based upon the first
+	// parameter. This task will be done clientside.
+	// 
+	// Will parse and open desired file before parsing the socket number, IP and port number to open 
+	// a connection. 
+	// 
+	// when metadata has been successfully parsed and opened, relay to client that connection was opened
+	// (tweak current feedback line) 
+	// e.g. "Connection was opened at [IP], port [port num.], at socket [socket num.]"
+	// 
+	//
 
 	if (argc >= 2)
 	{
@@ -182,6 +194,7 @@ int main(int argc, char* argv[])
 
 	ReliableConnection connection(ProtocolId, TimeOut);
 
+
 	const int port = mode == Server ? ServerPort : ClientPort;
 
 	if (!connection.Start(port))
@@ -190,23 +203,23 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	// need to tweak this functionality to accept and parse the new set of parameters and their formats. 
-	// add a call to a FileOperations.cpp function that will open a file based upon the first
-	// parameter. This task will be done clientside.
-	// 
-	// Will parse and open desired file before parsing the socket number, IP and port number to open 
-	// a connection. 
-	// 
-	// when metadata has been successfully parsed and opened, relay to client that connection was opened
-	// (tweak current feedback line) 
-	// e.g. "Connection was opened at [IP], port [port num.], at socket [socket num.]"
-	// 
-	//
 
 	if (mode == Client)
 		connection.Connect(address);
 	else
 		connection.Listen();
+
+	//
+	// After client side has recieved validation for a compatible file, 
+	// confirmation of file metadata will be sent in the form of a packet.
+	// The header should include all relevant information regarding the 
+	// connection and the file contents.
+	// 
+	// could we maybe send a packet with a bunch of preliminary information(?)
+	// some sort of separate packet (?)
+	// 
+	// The metadata should probably be retrieved before anything substantial occurs.
+	//
 
 	bool connected = false;
 	float sendAccumulator = 0.0f;
@@ -273,6 +286,16 @@ int main(int argc, char* argv[])
 			printf("% s", "packet sent !");
 		}
 
+
+		//
+		// add functionality here that will guide the program through the transmission.
+		// A call to another function should be used, one that checks on the server side
+		// against the filesize and all of the packets accumulated thus far.
+		// 
+		// care should also be taken to ensure that pieces are recieved in the proper order and 
+		// without error. once an entire chunk is recieved, checking should be done to reduce 
+		// overhead (before doing a full-file check).
+		//
 		while (true)
 		{
 			unsigned char packet[256];
@@ -283,6 +306,14 @@ int main(int argc, char* argv[])
 		}
 
 		// show packets that were acked this frame
+
+		//
+		// As transmission begins, a copy of the transmitted file should be created on the server-side file system.
+		// (after compatibility is ensured)
+		// write each piece to this new file as it is completed. This will allow at least one error-check before 
+		// information is written. Keep track of progress in file transmission with a generic progress variable 
+		// (e.g. chunks completed) that can be incremented and tracked with a sort of 'progress' function.
+		//
 
 #ifdef SHOW_ACKS
 		unsigned int* acks = NULL;
@@ -326,7 +357,15 @@ int main(int argc, char* argv[])
 
 		net::wait(DeltaTime);
 	}
-
+	//
+	// before shutdown, check back with our progress function and see if the entire file has been transmited 
+	// (did we miss any packets)?
+	// 
+	// SHA-2 verification is considered as a first option in the protocol. utilising the metadata of 
+	// the packets and the fully transmitted file (serverside), a file integirty digest will be 
+	// generated and checked in comparison to the transmitted file. Users will be notified of a problem 
+	// in file transmission.
+	//
 	ShutdownSockets();
 
 	return 0;
