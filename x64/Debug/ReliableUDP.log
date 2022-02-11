@@ -1,0 +1,21 @@
+﻿  FileOperations.cpp
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(20,5): error C2665: 'strstr': none of the 2 overloads could convert all the argument types
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\string.h(518,28): message : could be 'char *strstr(char *const ,const char *const )'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vcruntime_string.h(82,38): message : or       'const char *strstr(const char *,const char *)'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(20,5): message : while trying to match the argument list '(std::string, const char [5])'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(23,11): error C2059: syntax error: ')'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(23,13): error C2143: syntax error: missing ';' before '{'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(26,2): error C2181: illegal else without matching if
+  ReliableUDP.cpp
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\Net.h(192,21): warning C4244: '=': conversion from 'SOCKET' to 'int', possible loss of data
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\Net.h(912,1): warning C4244: '/=': conversion from 'float' to 'int', possible loss of data
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\Net.h(913,1): warning C4244: '/=': conversion from 'float' to 'int', possible loss of data
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(20,5): error C2665: 'strstr': none of the 2 overloads could convert all the argument types
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\ucrt\string.h(518,28): message : could be 'char *strstr(char *const ,const char *const )'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\vcruntime_string.h(82,38): message : or       'const char *strstr(const char *,const char *)'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(20,5): message : while trying to match the argument list '(std::string, const char [5])'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(23,11): error C2059: syntax error: ')'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(23,13): error C2143: syntax error: missing ';' before '{'
+C:\Users\maxpa\Downloads\ReliableUDP\ReliableUDP\FileOperations.cpp(26,2): error C2181: illegal else without matching if
+  Verification.cpp
+  Generating Code...
