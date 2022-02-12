@@ -24,6 +24,8 @@ const float SendRate = 1.0f / 30.0f;
 const float TimeOut = 10.0f;
 const int PacketSize = 256;
 
+const int FileNameLength = 256;
+
 class FlowControl
 {
 public:
@@ -118,18 +120,7 @@ private:
 
 int main(int argc, char* argv[])
 {
-	// command line arguments should be included. users should be able to configure their 
-	// connections using the command line arguments, giving essential metadata for 
-	// transmission. 
-	// 
-	// **First argument should include name of desired file to transmit.**
-	// allow both relative and explicit filepaths. 
-	//
-	// Remember to include reasonable defaults, and add user feedback showing their currently 
-	// configured parameters.
-	// ask for socket, IP, port, respectively. 
-	// FORMAT WILL BE AS FOLLOWS:
-	// ReliableUDP.exe [file] [socket num.] [IP] [port num.]
+
 
 	enum Mode
 	{
@@ -153,15 +144,47 @@ int main(int argc, char* argv[])
 	// 
 	//
 
-	if (argc >= 2)
-	{
-		int a, b, c, d;
+		// command line arguments should be included. users should be able to configure their 
+	// connections using the command line arguments, giving essential metadata for 
+	// transmission. 
+	// 
+	// **First argument should include name of desired file to transmit.**
+	// allow both relative and explicit filepaths. 
+	//
+	// Remember to include reasonable defaults, and add user feedback showing their currently 
+	// configured parameters.
+	// ask for socket, IP, port, respectively. 
+	// FORMAT WILL BE AS FOLLOWS:
+	// ReliableUDP.exe [file] [IP] [port num.]
+
+	for (int i = 1; i <= argc; i++) {
+		//loop through args. skip the first.
+		switch (argc) {
+		case 1:
+			// program name.
+			break;
+		case 2:
+			//filename.
+			char* fileName[FileNameLength];
+			//assign fileName.
+#pragma warning (disable: 4996) 
+			strcpy(*fileName, argv[2]);
+			break;
+		case 3:
+			//IP.
+			int a, b, c, d;
 #pragma warning(suppress : 4996)
-		if (sscanf(argv[1], "%d.%d.%d.%d", &a, &b, &c, &d))
-		{
-			mode = Client;
-			address = Address(a, b, c, d, ServerPort);
+			if (sscanf(argv[3], "%d.%d.%d.%d", &a, &b, &c, &d))
+			{
+				mode = Client;
+				address = Address(a, b, c, d, ServerPort);
+			}
+			else {
+				//set default.
+			}
+
 		}
+
 	}
 
 	// before connection is opened, ensure that file exists and can be opened.
@@ -354,7 +377,7 @@ int main(int argc, char* argv[])
 			statsAccumulator -= 0.25f;
 		}
 
-		net::wait(DeltaTime);
+		//net::wait(DeltaTime);
 	}
 	//
 	// before shutdown, check back with our progress function and see if the entire file has been transmited 

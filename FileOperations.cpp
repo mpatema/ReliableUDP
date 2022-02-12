@@ -10,7 +10,8 @@ using namespace std;
 
 
 int OpenFile (const char* fileName[]) {
-	FILE* newFile = fopen(*fileName, "r");
+	FILE* newFile;
+	fopen_s(&newFile, *fileName, "r");
 	if (newFile != NULL) {
 		
 		return 0;
@@ -22,4 +23,5 @@ int OpenFile (const char* fileName[]) {
 }
 
 int FileExtensionVal () {
+	return 0;
 }
