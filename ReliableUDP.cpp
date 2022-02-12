@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
 	// FORMAT WILL BE AS FOLLOWS:
 	// ReliableUDP.exe [file] [IP] [port num.]
 
-	for (int i = 1; i <= argc; i++) {
+	for (int i = 0; i <= argc; i++) {
 		//loop through args. skip the first.
 		switch (argc) {
 		case 1:
@@ -166,6 +166,12 @@ int main(int argc, char* argv[])
 		case 2:
 			//filename.
 			char* fileName[FileNameLength];
+			//check for help switch.
+			if (strcmp(argv[2], "help")) {
+				printf("ReliableUDP: Usage\n");
+				printf("	ReliableUDP [input file] [IP] [port num.]\n");
+				printf("	 - Switches should be in order, any invalid arguments will be set to defaults.\n");
+			}
 			//assign fileName.
 #pragma warning (disable: 4996) 
 			strcpy(*fileName, argv[2]);
@@ -177,12 +183,16 @@ int main(int argc, char* argv[])
 			if (sscanf(argv[3], "%d.%d.%d.%d", &a, &b, &c, &d))
 			{
 				mode = Client;
-				address = Address(a, b, c, d, ServerPort);
 			}
 			else {
 				//set default.
 			}
+		case 4:
+			//port.
+			if (atoi(argv[4]) != 0 ) {
 
+			}
+			break;
 		}
 
 	}
