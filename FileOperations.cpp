@@ -9,11 +9,11 @@ using namespace std;
 
 
 
-int OpenFile (const char* fileName[]) {
+int OpenFile (char* fileName[]) {
 	FILE* newFile;
 	fopen_s(&newFile, *fileName, "r");
 	if (newFile != NULL) {
-		
+
 		return 0;
 	}
 	else {
