@@ -39,8 +39,7 @@ jobs:
       - name: Run build-wrapper
         run: |
           
-          build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} dotnet build ReliableUDP.sln
-      - name: Run sonar-scanner
+          build-wrapper-win-x86-64 --out-dir ${{ env.BUILD_WRAPPER_OUT_DIR }} msbuild ReliableUDP.sln
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
